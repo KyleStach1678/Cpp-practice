@@ -1,0 +1,42 @@
+20
+20,12
+9
+(7,6) (4,4)
+7
+(16,8) (nil,nil)
+11
+(10,2) (14,3)
+3
+(12,7) (nil,nil)
+1
+(5,2) (9,5)
+12
+(nil,nil) (nil,nil)
+4
+(11,1) (6,11)
+6
+(nil,nil) (nil,nil)
+13
+(nil,nil) (nil,nil)
+2
+(nil,nil) (nil,nil)
+5
+(3,10) (8,8)
+10
+(nil,nil) (nil,nil)
+8
+(13,3) (2,5)
+15
+(17,1) (19,4)
+14
+(nil,nil) (15,4)
+16
+(nil,nil) (nil,nil)
+20
+(nil,nil) (nil,nil)
+19
+(nil,nil) (nil,nil)
+17
+(20,7) (18,5)
+18
+(nil,nil) (nil,nil)

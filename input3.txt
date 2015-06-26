@@ -1,0 +1,16 @@
+7
+6,5
+1
+(2,5) (3,6)
+7
+(nil,nil) (nil,nil)
+4
+(6,2) (7,3)
+2
+(4,7) (5,8)
+5
+(nil,nil) (nil,nil)
+3
+(nil,nil) (nil,nil)
+6
+(nil,nil) (nil,nil)
