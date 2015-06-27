@@ -1,0 +1,251 @@
+int main(int argc, char** argv) {
+	if (argc == 1) {
+		std::cout << "No file given" << std::endl;
+		exit(0);
+	}
+
+	Node* node_root;
+	Node* source, *destination, *common;
+	std::tie(node_root, source, destination, common) = Node::parse(argv[1]);
+
+	std::vector<int> path;
+	int weight;
+	std::tie(path, weight) = common->findPath(source, destination);
+
+	std::cout << "Path is " << path[0];
+	for (int i = 1; i < path.size(); i++) {
+		std::cout << '-' << path[i];
+	}
+	std::cout << " and weight is " << weight << std::endl;
+}
+
+
+std::tuple<Node *, Node *, Node *, Node *> Node::parse(std::string filename) {
+  std::ifstream file;
+  file.open(filename);
+  if (!file.is_open()) {
+    std::cout << "File not found: " << filename << std::endl;
+    exit(0);
+  }
+  std::string buf;
+  std::getline(file, buf);
+  int numNodes = std::stoi(buf);
+
+  std::getline(file, buf);
+  int src, dest;
+  for (int i = 0; i < buf.length(); i++) {
+    if (buf[i] == ',') {
+      src = std::stoi(buf.substr(0, i));
+      dest = std::stoi(buf.substr(i + 1));
+    }
+  }
+
+  ParsedMap info;
+  int rootname = -1;
+
+  while (!file.eof()) {
+    std::getline(file, buf);
+    if (buf.length() < 1)
+      break;
+    int node = std::stoi(buf);
+    if (rootname == -1) {
+      rootname = node;
+    }
+
+    std::getline(file, buf);
+    std::stringstream ss(buf);
+    std::string leftChild, rightChild;
+    ss >> leftChild >> rightChild;
+
+    leftChild = leftChild.substr(1, leftChild.length() - 2);
+    rightChild = rightChild.substr(1, rightChild.length() - 2);
+
+    if (rightChild.length() < 1 || leftChild.length() < 1)
+      break;
+
+    int leftName, leftWeight, rightName, rightWeight;
+
+    for (int i = 0; i < leftChild.length(); i++) {
+      if (leftChild[i] == ',') {
+        if (leftChild[0] == 'n') {
+          leftName = leftWeight = -1;
+        } else {
+          leftName = std::stoi(leftChild.substr(0, i));
+          leftWeight = std::stoi(leftChild.substr(i + 1));
+        }
+      }
+    }
+
+    for (int i = 0; i < rightChild.length(); i++) {
+      if (rightChild[i] == ',') {
+        if (rightChild[0] == 'n') {
+          rightName = rightWeight = -1;
+        } else {
+          rightName = std::stoi(rightChild.substr(0, i));
+          rightWeight = std::stoi(rightChild.substr(i + 1));
+        }
+      }
+    }
+    info[node] = std::tuple<int, int, int, int>(leftName, leftWeight, rightName,
+                                                rightWeight);
+  }
+
+  file.close();
+
+  Node *root = new Node(rootname, nullptr, -1);
+  Node *source_p, *dest_p, *common_p;
+  std::tie(source_p, dest_p, common_p) = root->populate(info, src, dest);
+
+  if (common_p == nullptr) {
+    std::cout << "Invalid Input" << std::endl;
+    exit(0);
+  }
+
+  return std::make_tuple(root, source_p, dest_p, common_p);
+}
+
+Node::Node(int name, Node *p, int parent_weight) {
+  node_name = name;
+  parent = p;
+  this->parent_weight = parent_weight;
+}
+
+std::tuple<std::vector<int>, int> Node::findPath(Node *src, Node *dest) {
+  std::stack<int> destStack;
+  std::vector<int> pathVector;
+  int weightCount = 0;
+  Node *currentNode = src;
+  while (currentNode != this && currentNode->parent != nullptr) {
+    pathVector.push_back(currentNode->node_name);
+    weightCount += currentNode->parent_weight;
+    currentNode = currentNode->parent;
+  }
+  pathVector.push_back(this->node_name);
+  currentNode = dest;
+  while (currentNode != this && currentNode->parent != nullptr) {
+    destStack.push(currentNode->node_name);
+    weightCount += currentNode->parent_weight;
+    currentNode = currentNode->parent;
+  }
+  while (!destStack.empty()) {
+    pathVector.push_back(destStack.top());
+    destStack.pop();
+  }
+  return std::make_tuple(pathVector, weightCount);
+}
+
+int Node::search_child_weight(int search_name) {
+  if (search_name == node_name) {
+    return 0;
+  }
+
+  if (left != nullptr) {
+    int left_weight = left->search_child_weight(search_name);
+    if (left_weight >= 0) {
+      return left_weight + left->parent_weight;
+    }
+  }
+
+  if (right != nullptr) {
+    int right_weight = right->search_child_weight(search_name);
+    if (right_weight >= 0) {
+      return right_weight + right->parent_weight;
+    }
+  }
+  return -1;
+}
+
+/*
+** Node::populate
+** node_map: a map with the key as an integer of the node's name and the value
+*as a
+** 		tuple of four elements with the first two being the left
+*child's name and weight
+** 		respectively and the last two being those of the right child
+** Populates the node's children based on a map of values corresponding to
+*connections
+*/
+std::tuple<Node *, Node *, Node *> Node::populate(Node::ParsedMap &node_map,
+                                                  int src_name, int dst_name) {
+  auto it = node_map.find(node_name);
+  if (it != node_map.end()) {
+    int leftName, leftWeight;
+    int rightName, rightWeight;
+    std::tie(leftName, leftWeight, rightName, rightWeight) = it->second;
+    node_map.erase(it);
+    std::tuple<Node *, Node *, Node *> ret;
+    if (this->node_name == src_name) {
+      std::get<0>(ret) = this;
+    }
+    if (this->node_name == dst_name) {
+      std::get<1>(ret) = this;
+    }
+
+    if (leftName > 0) {
+      this->left = new Node(leftName, this, leftWeight);
+      Node *srctmp, *dsttmp, *commontmp;
+      std::tie(srctmp, dsttmp, commontmp) =
+          this->left->populate(node_map, src_name, dst_name);
+      if (srctmp != nullptr)
+        std::get<0>(ret) = srctmp;
+      if (dsttmp != nullptr)
+        std::get<1>(ret) = dsttmp;
+      if (commontmp != nullptr)
+        std::get<2>(ret) = commontmp;
+    } else {
+      this->left = nullptr;
+    }
+
+    if (rightName > 0) {
+      this->right = new Node(rightName, this, rightWeight);
+      Node *srctmp, *dsttmp, *commontmp;
+      std::tie(srctmp, dsttmp, commontmp) =
+          this->right->populate(node_map, src_name, dst_name);
+      if (srctmp != nullptr)
+        std::get<0>(ret) = srctmp;
+      if (dsttmp != nullptr)
+        std::get<1>(ret) = dsttmp;
+      if (commontmp != nullptr)
+        std::get<2>(ret) = commontmp;
+    } else {
+      this->right = nullptr;
+    }
+
+    if (std::get<0>(ret) != nullptr && std::get<1>(ret) != nullptr &&
+        std::get<2>(ret) == nullptr) {
+      std::get<2>(ret) = this;
+    }
+
+    return ret;
+  } else {
+    std::cout << "Invalid tree" << std::endl;
+    std::cout << node_name << std::endl;
+    exit(0);
+  }
+}
+
+/*
+** Node::to_string
+** depth: the whitespace depth of this node
+** Returns the node and its children, recursively printed, in the following
+*format:
+** 1:-1
+**   2:5
+**     4:7
+**       6:2
+**       7:3
+**     5:8
+**   3:6
+**/
+std::string Node::to_string(int depth) {
+  std::stringstream out;
+  for (int i = 0; i < depth; i++) {
+    out << "  ";
+  }
+  out << node_name << ':' << parent_weight << std::endl;
+  if (left != nullptr)
+    out << left->to_string(depth + 1);
+  if (right != nullptr)
+    out << right->to_string(depth + 1);
+  return out.str();
+}

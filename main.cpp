@@ -1,32 +1,21 @@
-#include "node.h"
-#include <fstream>
+#include <iostream>
+#include "Node.h"
+#include "Tree.h"
 
-int main(int argc, char** argv) {
-	if (argc == 1) {
-		std::cout << "No file given" << std::endl;
-		exit(0);
-	}
-	Node::ParsedMap info = {
-		std::pair<int, std::tuple<int,int,int,int>>(1, std::tuple<int,int,int,int>(2,5,3,6)),
-		std::pair<int, std::tuple<int,int,int,int>>(2, std::tuple<int,int,int,int>(4,7,5,8)),
-		std::pair<int, std::tuple<int,int,int,int>>(3, std::tuple<int,int,int,int>(-1,-1,-1,-1)),
-		std::pair<int, std::tuple<int,int,int,int>>(4, std::tuple<int,int,int,int>(6,2,7,3)),
-		std::pair<int, std::tuple<int,int,int,int>>(5, std::tuple<int,int,int,int>(-1,-1,-1,-1)),
-		std::pair<int, std::tuple<int,int,int,int>>(6, std::tuple<int,int,int,int>(-1,-1,-1,-1)),
-		std::pair<int, std::tuple<int,int,int,int>>(7, std::tuple<int,int,int,int>(-1,-1,-1,-1)),
-	};
-
-	Node* node_root;
-	Node* source, *destination, *common;
-	std::tie(node_root, source, destination, common) = Node::parse(argv[1]);
-
-	std::vector<int> path;
-	int weight;
-	std::tie(path, weight) = common->findPath(source, destination);
-
-	std::cout << "Path is " << path[0];
-	for (int i = 1; i < path.size(); i++) {
-		std::cout << '-' << path[i];
-	}
-	std::cout << " and weight is " << weight << std::endl;
+int main() {
+  Tree *t = new Tree(1);
+  t->AddNode(11, 4);
+  t->AddNode(8, 4);
+  t->AddNode(9, 5);
+  t->AddNode(4, 9);
+  t->AddNode(6, 3);
+  t->AddNode(5, 2);
+  t->AddNode(12, 5);
+  t->AddNode(7, 7);
+  t->AddNode(10, 7);
+  t->AddNode(2, 4);
+  t->AddNode(3, 1);
+  delete t->RemoveNode(11);
+  std::cout << t->ToString() << std::endl;
+  return 0;
 }

@@ -1,36 +1,40 @@
+#ifndef NODE_H
+#define NODE_H
+
 #include <iostream>
 #include <map>
 #include <tuple>
-#include <fstream>
 #include <sstream>
 #include <vector>
 
 class Node {
 public:
-	static std::tuple<Node*,Node*,Node*,Node*> parse(std::string filename);
-	typedef std::map<int, std::tuple<int, int, int, int>> ParsedMap;
+  Node(int name, Node *p, int parent_weight);
+  ~Node();
 
-	Node* left;
-	Node* right;
-	Node* parent;
-	int node_name;
-	int parent_weight;
+  int Value();
 
-	// Create a new node
-	Node(int name, Node* p, int parent_weight);
+  Node *Left();
+  Node *Right();
+  Node *Parent();
+  void Left(Node *node);
+  void Right(Node *node);
 
-	std::tuple<std::vector<int>,int> findPath(Node *src, Node *dest);
+  int LeftWeight();
+  int RightWeight();
+  int ParentWeight();
+  void ParentWeight(int weight);
 
-	// Search for a specific child node, returning the weight of the
-	// path to the node or -1 if the node is not found
-	int search_child_weight(int search_name);
+  Node *AddChild(int child, int weight, bool left);
+  Node *AddChild(int child, int weight, int max_depth = 0xFFFFFFF);
+  Node *RemoveChild(int child);
 
-	// Populate the node based on a map of values
-	std::tuple<Node*,Node*,Node*> populate(Node::ParsedMap& node_map, int src_name, int dst_name);
-
-	// Create a string representation of the node
-	std::string to_string(int depth);
-
-	// Find the shortest path between two nodes
-	std::tuple<int, std::vector<int>> shortest_path(Node* targetNode);
+private:
+  Node *_left;
+  Node *_right;
+  Node *_parent;
+  int _key;
+  int _parent_weight;
 };
+
+#endif
