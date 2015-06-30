@@ -21,14 +21,29 @@ NodePath TreeSearcher::FindPath() {
 		destStack.push(currentNode);
 		currentNode = currentNode -> Parent();
 	}
-	while(srcQueue.back() == destStack.top()) {
+
+	Node* common;
+	while(srcQueue.size() > 1 && destStack.size() > 1 && srcQueue.back() == destStack.top()) {
+		common = destStack.top();
 		srcQueue.pop_back();
 		destStack.pop();
 	}
+
+	if (srcQueue.back() == destStack.top()) {
+		common = destStack.top();
+		if (srcQueue.size() > 1)
+			srcQueue.pop_back();
+		else if (destStack.size() > 1)
+			destStack.pop();
+	}
+
 	for(Node *node : srcQueue) {
 		path.AddPathNode(node);
 	}
-	path.AddPathNode(destStack.top()->Parent());
+
+	if (common != src && common != dest)
+		path.AddPathNode(common);
+
 	while (!destStack.empty()) {
 		path.AddPathNode(destStack.top());
 		destStack.pop();

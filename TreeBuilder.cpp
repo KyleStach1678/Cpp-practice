@@ -32,7 +32,7 @@ std::tuple<Tree*, TreeSearcher> TreeBuilder::parse(std::string filename) {
 	std::ifstream file;
 	file.open(filename);
 	if (!file.is_open()) {
-		std::cout << filename << "not found." << std::endl;
+		std::cout << filename << " not found." << std::endl;
 		exit(0);
 	}
 	std::string buf;
@@ -68,6 +68,12 @@ std::tuple<Tree*, TreeSearcher> TreeBuilder::parse(std::string filename) {
 		std::tie(rightName,rightWeight) = commaParse(rightChild);
 
 		info[node] = std::make_tuple(leftName,leftWeight,rightName,rightWeight);
+		if (info.find(leftName) == info.end()) {
+			info[leftName] = std::make_tuple(-1,-1,-1,-1);
+		}
+		if (info.find(rightName) == info.end()) {
+			info[rightName] = std::make_tuple(-1,-1,-1,-1);
+		}
 	}
 	file.close();
 
@@ -101,6 +107,10 @@ TreeSearcher TreeBuilder::populate(Tree *tree, ParsedMap nodeMap, int src, int d
 					currentNode->Right(new Node(rightName, currentNode, rightWeight));
 				}
 				nodeMap.erase(it);
+			} else {
+				// Everything is kill
+				std::cout << "Invalid Tree" << std::endl;
+				exit(0);
 			}
 		}
 		else if (status.top() == 1) { // Populate left child
@@ -121,6 +131,15 @@ TreeSearcher TreeBuilder::populate(Tree *tree, ParsedMap nodeMap, int src, int d
 			status.pop();
 			currentNode = currentNode->Parent();
 		}
+	}
+
+	auto it = nodeMap.find(-1);
+	if (it != nodeMap.end()) {
+		nodeMap.erase(it);
+	}
+	if (nodeMap.size() != 0) {
+		std::cout << "Invalid Input" << std::endl;
+		exit(0);
 	}
 	return searcher;
 }
