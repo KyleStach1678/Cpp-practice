@@ -6,7 +6,9 @@
 #include <deque>
 #include <stack>
 
-NodePath TreeSearcher::FindPath() {
+NodePath TreeSearcher::FindPath(Node* src, Node* dest) {
+	src = src ? src : this->src;
+	dest = dest ? dest : this->dest;
 	std::deque<Node *> srcQueue;
 	std::stack<Node *> destStack;
 	NodePath path;

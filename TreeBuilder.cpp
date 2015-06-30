@@ -10,8 +10,8 @@
 #include <iostream>
 
 std::tuple<int,int> TreeBuilder::commaParse(std::string commaString) {
-	int src;
-	int dest;
+	int src = -2;
+	int dest = -2;
 
 	for (int i = 0; i < commaString.length(); i++) {
 		if (commaString[i] == ',') {
@@ -24,6 +24,10 @@ std::tuple<int,int> TreeBuilder::commaParse(std::string commaString) {
 				dest = -1;
 			}
 		}
+	}
+	if (src == -2 || dest == -2) {
+		std::cout << "Invalid input" << std::endl;
+		exit(0);
 	}
 	return std::make_tuple(src,dest);
 }
