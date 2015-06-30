@@ -63,11 +63,11 @@ Node *Tree::RemoveNode(int node_value) { RemoveNode(FindNode(node_value)); }
 std::string Tree::ToString() {
   std::stringstream out;
   Node *currentNode = _root;
-  std::stack<short> completed;
+  std::stack<char> completed;
   completed.push(0);
   while (!completed.empty()) {
     if (completed.top() == 0) {
-      for (int i = 0; i < completed.size(); i++) {
+      for (int i = 0; i < completed.size() - 1; i++) {
         out << "  ";
       }
       out << currentNode->Value() << '\n';
